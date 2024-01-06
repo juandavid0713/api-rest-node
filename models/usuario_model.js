@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 
+//CREACIÓN DEL ESQUEMA DE LA TABLA (COLECCION EN MONGODB)
 const usuarioSchema = new mongoose.Schema({
     email: {
         type: String,
@@ -23,4 +24,5 @@ const usuarioSchema = new mongoose.Schema({
     }
 })
 
+//EXPORTE DEL MODELO DE USUARIO E INSTANCIA DE LA CLASE DEL ESQUEMA DE MONGODB
 module.exports = mongoose.model('usuario',usuarioSchema);
