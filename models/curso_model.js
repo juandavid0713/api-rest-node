@@ -1,10 +1,14 @@
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
 //CREACIÓN DEL ESQUEMA DE LA TABLA (COLECCION EN MONGODB)
 const cursoSchema = new mongoose.Schema({
     titulo: {
         type: String,
         required: true
+    },
+    autor:{
+        type: Schema.Types.ObjectId, ref: 'usuario'
     },
     descripcion: {
         type: String,

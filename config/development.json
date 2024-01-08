@@ -1,0 +1,10 @@
+{
+    "nombre": "API Node Js",
+    "configDB": {
+        "HOST": "mongodb://localhost:27017/cursos"
+    },
+    "configToken": {
+        "secret": "password",
+        "expirationTime": "1h"
+    }
+}

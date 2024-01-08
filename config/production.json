@@ -1,0 +1,10 @@
+{
+    "nombre":"API Node Js",
+    "configDB":{
+
+    },
+    "configToken":{
+        "secret":"password",
+        "expirationTime":"1h"
+    }
+}

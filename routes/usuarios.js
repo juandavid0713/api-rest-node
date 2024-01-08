@@ -2,6 +2,9 @@ const express = require('express');
 const Joi = require('joi');
 const bcrypt = require('bcrypt');
 const Usuario = require("../models/usuario_model");
+var jwt = require('jsonwebtoken');
+const config = require('config');
+const validarToken = require('../middlewares/auth');
 
 const ruta = express.Router();
 
@@ -12,8 +15,10 @@ const schema = Joi.object({
   password: Joi.string().pattern(new RegExp('^[a-zA-Z0-9]{5,30}$')),
 });
 
+
+
 //RUTA GET
-ruta.get('/:estado', (req, res) => {
+ruta.get('/:estado',validarToken, (req, res) => {
   let listadoUsuarios = listarUsuarios(req.params.estado);
   listadoUsuarios.then(users => {
     res.json(users)
@@ -63,7 +68,7 @@ ruta.post('/', (req, res) => {
 })
 
 //RUTA PUT
-ruta.put('/:email', function (req, res) {
+ruta.put('/:email', validarToken, function (req, res) {
   let actualizarUser = actualizarUsuario(req.params.email, req.body);
 
   actualizarUser.then(valor => {

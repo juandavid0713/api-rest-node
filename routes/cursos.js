@@ -1,6 +1,8 @@
 const express = require('express');
 const Curso = require("../models/curso_model");
 const Joi = require('joi');
+const validarToken = require('../middlewares/auth');
+
 
 const ruta = express.Router();
 
@@ -12,7 +14,7 @@ const schema = Joi.object({
 
 
 //RUTA GET
-ruta.get('/', (req, res) => {
+ruta.get('/',validarToken, (req, res) => {
   let listadoCursos = listarCursos();
   listadoCursos.then(cursos => {
     res.json(cursos)
@@ -22,13 +24,13 @@ ruta.get('/', (req, res) => {
 });
 
 //RUTA POST
-ruta.post('/', (req, res) => {
+ruta.post('/', validarToken, (req, res) => {
   const { error, value } = schema.validate({
     titulo: req.body.titulo,
     descripcion: req.body.descripcion,
   });
   if (!error) {
-    let crearCurso = crearCursos(req.body);
+    let crearCurso = crearCursos(req);
     crearCurso.then(curso => {
       res.json(curso);
     }).catch(err => {
@@ -40,7 +42,7 @@ ruta.post('/', (req, res) => {
 });
 
 //RUTA PUT
-ruta.put('/:id', (req, res) => {
+ruta.put('/:id', validarToken, (req, res) => {
   const { error, value } = schema.validate({
     titulo: req.body.titulo,
     descripcion: req.body.descripcion,
@@ -59,16 +61,17 @@ ruta.put('/:id', (req, res) => {
 
 //MÉTODO PARA LISTAR LOS CURSOS
 async function listarCursos() {
-  let cursos = await Curso.find({});
+  let cursos = await Curso.find({}).populate('autor','nombre');
   return cursos;
 }
 
 
 //MÉTODO PARA CREAR UN CURSO EN LA BBDD
-async function crearCursos(body) {
+async function crearCursos(req) {
   let curso = new Curso({
-    titulo: body.titulo,
-    descripcion: body.descripcion
+    titulo: req.body.titulo,
+    autor: req.usuario._id,
+    descripcion: req.body.descripcion
   });
   return await curso.save();
 }
