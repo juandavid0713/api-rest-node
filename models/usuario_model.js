@@ -4,7 +4,8 @@ const mongoose = require('mongoose');
 const usuarioSchema = new mongoose.Schema({
     email: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     nombre: {
         type: String,
@@ -25,4 +26,4 @@ const usuarioSchema = new mongoose.Schema({
 })
 
 //EXPORTE DEL MODELO DE USUARIO E INSTANCIA DE LA CLASE DEL ESQUEMA DE MONGODB
-module.exports = mongoose.model('usuario',usuarioSchema);
+module.exports = mongoose.model('usuario', usuarioSchema);

@@ -1,5 +1,6 @@
 const express = require('express');
 const Joi = require('joi');
+const bcrypt = require('bcrypt');
 const Usuario = require("../models/usuario_model");
 
 const ruta = express.Router();
@@ -15,7 +16,7 @@ const schema = Joi.object({
 ruta.get('/:estado', (req, res) => {
   let listadoUsuarios = listarUsuarios(req.params.estado);
   listadoUsuarios.then(users => {
-    res.json({ valor: users })
+    res.json(users)
   }).catch(err => {
     res.status(400).json({
       error: err
@@ -26,23 +27,39 @@ ruta.get('/:estado', (req, res) => {
 
 //RUTA POST
 ruta.post('/', (req, res) => {
-  const { error, value } = schema.validate({
-    nombre: req.body.nombre,
-    email: req.body.email,
-    password: req.body.password
+  let validar = Usuario.findOne({ email: req.body.email }).exec();
+  validar.then(user => {
+    if (user) {
+      return res.status(400).json("Usuario ya existe en la BBDD");
+    }
+    else {
+      const { error, value } = schema.validate({
+        nombre: req.body.nombre,
+        email: req.body.email,
+        password: req.body.password
+      });
+      if (!error) {
+        let crearUser = crearUsuario(req.body);
+        crearUser.then(user => {
+          res.json({
+            id: user._id,
+            nombre: user.nombre,
+            email: user.email,
+            estado: user.estado
+          });
+        }).catch(err => {
+          res.status(400).json({ error: err });
+        })
+      } else {
+        res.status(400).json({
+          error: error
+        })
+      }
+    }
+  }).catch(err => {
+    res.json(err);
   });
-  if (!error) {
-    let crearUser = crearUsuario(req.body);
-    crearUser.then(user => {
-      res.json({ valor: user });
-    }).catch(err => {
-      res.status(400).json({ error: err });
-    })
-  } else {
-    res.status(400).json({
-      error: error
-    })
-  }
+
 })
 
 //RUTA PUT
@@ -59,16 +76,19 @@ ruta.put('/:email', function (req, res) {
 //MÉTODO PARA LISTAR UN USUARIO SEGÚN SU ESTADO
 async function listarUsuarios(query) {
   let estado = { estado: query };
-  let usuarios = await Usuario.find(estado, null).exec();
+  let usuarios = await Usuario.find(estado, 'nombre email estado').exec();
   return usuarios;
 }
 
 //MÉTODO PARA CREAR UN USUARIO EN LA BBDD
 async function crearUsuario(body) {
+  const saltRounds = await bcrypt.genSalt(10);
+  const myPlaintextPassword = body.password;
+  const crypted = await bcrypt.hash(myPlaintextPassword, saltRounds);
   let usuario = new Usuario({
     email: body.email,
     nombre: body.nombre,
-    password: body.password
+    password: crypted
   });
   return await usuario.save();
 }
